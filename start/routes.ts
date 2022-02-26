@@ -23,3 +23,8 @@ import Route from '@ioc:Adonis/Core/Route'
 Route.get('/', async () => {
   return { hello: 'world' }
 })
+
+Route.get('/usuarios','UserController.index')
+Route.get('/usuario/:id','UserController.show')
+Route.post('/usuarios/create','UserController.store')
+Route.post('/usuarios/create/:id','UserController.store')
