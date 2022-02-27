@@ -5,42 +5,74 @@ export default class UserController {
   public async index({response}: HttpContextContract) {
 
     const users = await User.all()
-    response.json({
+    response.status(200)
+    response.send({
       'users':users
     })
-    response.status(200)
   }
 
   public async store({request , response}: HttpContextContract) {
 
     const u = await User.create(request.body())
-    response.json({
+
+    response.status(201)
+    response.send({
       'user':u.$attributes,
       'mensaje':'Usuario creado correctamente'
     })
-    response.status(201)
   }
 
   public async show({params, response}: HttpContextContract) {
     try{
       const user = await User.findOrFail(params.id)
-      response.json({
+      response.status(200)
+      response.send({
         'user':user
       })
-      response.status(200)
     }catch(user){
-      response.json({
+      response.status(404)
+      response.send({
         'mensaje':'Usuario no encontrado'
       })
-      response.status(404)
     }
   }
   public async update({request , response}: HttpContextContract) {
-    console.log(request.all())
+    try{
+      const user = await User.findOrFail(request.params().id)
+      user.name = request.input('name')
+      user.username = request.input('username')
+      user.email = request.input('email')
+      user.birthday = request.input('birthday')
+      user.save()
+      response.status(200)
+      response.send({
+        'mensaje':'Usuario Actualizado',
+        'user':user
+      })
+    }catch(user){
+      response.status(404)
+      response.send({
+        'mensaje':'Usuario no encontrado'
+      })
+    }
   }
 
-  public async destroy({params}: HttpContextContract) {
-    const user = await User.findOrFail(params.id)
-    user.delete()
+  public async destroy({params , response}: HttpContextContract) {
+    try {
+      const user = await User.findOrFail(params.id)
+      const usr_tmp = user
+      user.delete()
+      response.status(200)
+      response.send({
+        'mensaje':'Usuario Eliminado',
+        'user':usr_tmp
+      })
+    } catch (user) {
+      response.status(404)
+      response.send({
+        'mensaje':'Usuario no encontrado'
+      })
+
+    }
   }
 }
