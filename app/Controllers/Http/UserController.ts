@@ -1,5 +1,6 @@
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import User from 'App/Models/User'
+import { schema, rules } from '@ioc:Adonis/Core/Validator'
 
 export default class UserController {
   public async index({response}: HttpContextContract) {
@@ -13,13 +14,38 @@ export default class UserController {
 
   public async store({request , response}: HttpContextContract) {
 
-    const u = await User.create(request.body())
+    const newUserSchema = schema.create({
+      name: schema.string({trim:true}),
 
-    response.status(201)
-    response.send({
-      'user':u.$attributes,
-      'mensaje':'Usuario creado correctamente'
-    })
+      username: schema.string({}, [
+          rules.alpha({
+            allow: ['space', 'underscore', 'dash']
+          })
+        ]),
+
+        email: schema.string({}, [
+          rules.email({
+            sanitize: true,
+            domainSpecificValidation: true,
+          })
+        ]),
+
+        password: schema.string({}, [
+          rules.confirmed('password_confirmation')
+        ]),
+    });
+
+    try {
+      const payload = await request.validate({schema: newUserSchema,});
+      const u = await User.create(payload);
+      response.status(201)
+      response.send({
+        'user':u.$attributes,
+        'mensaje':'Usuario creado correctamente'
+      })
+    } catch (error) {
+      response.badRequest(error.messages)
+    }
   }
 
   public async show({params, response}: HttpContextContract) {
@@ -37,23 +63,49 @@ export default class UserController {
     }
   }
   public async update({request , response}: HttpContextContract) {
-    try{
-      const user = await User.findOrFail(request.params().id)
-      user.name = request.input('name')
-      user.username = request.input('username')
-      user.email = request.input('email')
-      user.birthday = request.input('birthday')
-      user.save()
-      response.status(200)
-      response.send({
-        'mensaje':'Usuario Actualizado',
-        'user':user
-      })
-    }catch(user){
-      response.status(404)
-      response.send({
-        'mensaje':'Usuario no encontrado'
-      })
+
+    const newUserSchema = schema.create({
+      name: schema.string({trim:true}),
+
+      username: schema.string({}, [
+          rules.alpha({
+            allow: ['space', 'underscore', 'dash']
+          })
+        ]),
+
+        email: schema.string({}, [
+          rules.email({
+            sanitize: true,
+            domainSpecificValidation: true,
+          })
+        ]),
+
+        password: schema.string({}, [
+          rules.confirmed('password_confirmation')
+        ]),
+    });
+
+    try {
+      try{
+        const user = await User.findOrFail(request.params().id)
+        user.name = request.input('name')
+        user.username = request.input('username')
+        user.email = request.input('email')
+        user.birthday = request.input('birthday')
+        user.save()
+        response.status(200)
+        response.send({
+          'mensaje':'Usuario Actualizado',
+          'user':user
+        })
+      }catch(user){
+        response.status(404)
+        response.send({
+          'mensaje':'Usuario no encontrado'
+        })
+      }
+    }catch(error){
+      response.badRequest(error.messages)
     }
   }
 
