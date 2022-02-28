@@ -45,6 +45,9 @@ export default class UserController {
       })
     } catch (error) {
       response.badRequest(error.messages)
+      response.send({
+        'mensaje':'Usuario no encontrado'
+      })
     }
   }
 
@@ -102,6 +105,9 @@ export default class UserController {
       }
     }catch(error){
       response.badRequest(error.messages)
+      response.send({
+        'mensaje':'Usuario no encontrado'
+      })
     }
   }
 
