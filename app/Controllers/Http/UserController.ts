@@ -46,7 +46,7 @@ export default class UserController {
     } catch (error) {
       response.badRequest(error.messages)
       response.send({
-        'mensaje':'Usuario no encontrado'
+        'mensaje':'Error al validar los datos'
       })
     }
   }
@@ -85,7 +85,7 @@ export default class UserController {
     });
 
     try {
-      const payload = await request.validate({schema: newUserSchema,});
+      await request.validate({schema: newUserSchema,});
       try{
         const user = await User.findOrFail(request.params().id)
         user.name = request.input('name')
@@ -106,7 +106,7 @@ export default class UserController {
     }catch(error){
       response.badRequest(error.messages)
       response.send({
-        'mensaje':'Usuario no encontrado'
+        'mensaje':'Error al validar los datos'
       })
     }
   }
