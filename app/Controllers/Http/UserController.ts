@@ -78,20 +78,16 @@ export default class UserController {
             sanitize: true,
             domainSpecificValidation: true,
           })
-        ]),
-
-        password: schema.string({}, [
-          rules.confirmed('password_confirmation')
-        ]),
+        ])
     });
 
     try {
+      const payload = await request.validate({schema: newUserSchema,});
       try{
         const user = await User.findOrFail(request.params().id)
         user.name = request.input('name')
         user.username = request.input('username')
         user.email = request.input('email')
-        user.birthday = request.input('birthday')
         user.save()
         response.status(200)
         response.send({

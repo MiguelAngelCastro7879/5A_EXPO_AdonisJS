@@ -17,8 +17,6 @@ export default class User extends BaseModel {
     consume: (value: string) => Encryption.decrypt(value),
   })
   public password: string
-  @column()
-  public birthday: Date
 
   @column.dateTime({ autoCreate: false })
   public createdAt: DateTime
